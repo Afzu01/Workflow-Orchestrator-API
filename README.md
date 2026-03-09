@@ -20,8 +20,8 @@ uvicorn app.main:app --reload
 
 Open: http://127.0.0.1:8000/docs
 
-## Why this project helps internship applications
+## Future Improvements
 
-- Shows end-to-end backend ownership
-- Demonstrates schema design, persistence, and API contracts
-- Aligns with webhook and workflow responsibilities
+- Add authentication and role-based access controls
+- Add retry and dead-letter handling for failed events
+- Add unit tests and basic CI pipeline
