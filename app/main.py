@@ -1,7 +1,9 @@
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import DateTime, Enum as SAEnum, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
@@ -40,11 +42,17 @@ engine = create_engine("sqlite:///data/events.db", echo=False)
 Base.metadata.create_all(engine)
 
 app = FastAPI(title="Workflow Orchestrator API", version="1.0.0")
+UI_FILE = Path(__file__).resolve().parent.parent / "ui" / "index.html"
 
 
 @app.get("/")
 def root() -> dict:
-    return {"message": "Workflow Orchestrator API", "docs": "/docs"}
+    return {"message": "Workflow Orchestrator API", "docs": "/docs", "ui": "/ui"}
+
+
+@app.get("/ui")
+def ui() -> FileResponse:
+    return FileResponse(UI_FILE)
 
 
 @app.post("/events")

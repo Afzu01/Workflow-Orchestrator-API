@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow Orchestrator UI</title>
+  <style>
+    :root {
+      --bg: #0a0f1f;
+      --ink: #eff6ff;
+      --muted: #9db0cc;
+      --panel: rgba(255, 255, 255, 0.08);
+      --line: rgba(255, 255, 255, 0.18);
+      --brand: #2de0c5;
+      --accent: #ffb25e;
+      --danger: #ff6f8b;
+      --ok: #67f0a8;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 85% 15%, #1a2e68 0%, transparent 38%),
+        radial-gradient(circle at 10% 80%, #123c47 0%, transparent 42%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    .wrap { max-width: 1100px; margin: 34px auto; padding: 0 16px 20px; }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(35, 74, 141, 0.78), rgba(28, 114, 105, 0.74));
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(9px);
+    }
+
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    .sub { margin: 0; color: #d9ecff; line-height: 1.5; }
+
+    .chips { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+      border: 1px solid rgba(45, 224, 197, 0.5);
+      background: rgba(45, 224, 197, 0.15);
+      color: #bffcf2;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .card h2 { margin: 0 0 10px; font-size: 18px; }
+
+    .stat-wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .stat {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .stat .k { font-size: 21px; font-weight: 800; }
+    .stat .l { color: var(--muted); font-size: 12px; }
+
+    label { display: block; margin: 8px 0 5px; font-size: 12px; color: var(--muted); }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.92);
+      color: #0f1f3b;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-size: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(120deg, var(--brand), #4ea4ff);
+      color: #052742;
+      margin-top: 10px;
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-soft { background: rgba(255,255,255,0.12); color: #ecf5ff; border: 1px solid var(--line); }
+
+    .table {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 9px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left; }
+    th { position: sticky; top: 0; background: rgba(8, 17, 35, 0.94); }
+
+    .status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .queued { background: rgba(255,178,94,0.2); color: #ffd7ab; }
+    .processed { background: rgba(103,240,168,0.18); color: #baf9cf; }
+    .failed { background: rgba(255,111,139,0.2); color: #ffced8; }
+
+    .mono {
+      margin-top: 10px;
+      background: #07142b;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      color: #d9f8f2;
+      min-height: 120px;
+      padding: 10px;
+      white-space: pre-wrap;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      overflow: auto;
+    }
+
+    a { color: #93c9ff; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Workflow Orchestrator</h1>
+      <p class="sub">Modern dashboard for event intake, status transitions, and live event monitoring. Use this instead of plain API docs for demos.</p>
+      <div class="chips">
+        <span class="chip">POST /events</span>
+        <span class="chip">GET /events</span>
+        <span class="chip">PATCH /events/{id}</span>
+        <span class="chip"><a href="/docs" target="_blank">Swagger Docs</a></span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Create Event</h2>
+        <div class="row">
+          <div>
+            <label>Source</label>
+            <input id="source" value="n8n" />
+          </div>
+          <div>
+            <label>Event Type</label>
+            <input id="eventType" value="order.created" />
+          </div>
+        </div>
+        <button id="createBtn">Create Event</button>
+        <pre id="createOut" class="mono">Result will appear here...</pre>
+      </article>
+
+      <article class="card">
+        <h2>Update Event Status</h2>
+        <div class="row">
+          <div>
+            <label>Event ID</label>
+            <input id="eventId" type="number" value="1" />
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="statusSel">
+              <option value="queued">queued</option>
+              <option value="processed">processed</option>
+              <option value="failed">failed</option>
+            </select>
+          </div>
+        </div>
+        <button id="updateBtn">Update Status</button>
+        <pre id="updateOut" class="mono">Result will appear here...</pre>
+      </article>
+    </section>
+
+    <section class="card" style="margin-top: 16px;">
+      <h2>Event Monitor</h2>
+      <div class="actions">
+        <button id="refreshBtn">Refresh Events</button>
+        <button id="autoBtn" class="btn-soft">Auto Refresh: Off</button>
+      </div>
+
+      <div class="stat-wrap" style="margin-top: 10px;">
+        <div class="stat"><div id="s-total" class="k">0</div><div class="l">Total</div></div>
+        <div class="stat"><div id="s-queued" class="k">0</div><div class="l">Queued</div></div>
+        <div class="stat"><div id="s-processed" class="k">0</div><div class="l">Processed</div></div>
+        <div class="stat"><div id="s-failed" class="k">0</div><div class="l">Failed</div></div>
+      </div>
+
+      <div class="table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Source</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="eventRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let autoTimer = null;
+
+    function setOutput(id, data) {
+      document.getElementById(id).textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function createEvent() {
+      const source = document.getElementById('source').value.trim();
+      const event_type = document.getElementById('eventType').value.trim();
+      try {
+        const res = await fetch('/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source, event_type })
+        });
+        const data = await res.json();
+        setOutput('createOut', data);
+        await loadEvents();
+      } catch (e) {
+        setOutput('createOut', { error: e.message });
+      }
+    }
+
+    async function updateEvent() {
+      const id = Number(document.getElementById('eventId').value);
+      const status = document.getElementById('statusSel').value;
+      try {
+        const res = await fetch(`/events/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        setOutput('updateOut', data);
+        await loadEvents();
+      } catch (e) {
+        setOutput('updateOut', { error: e.message });
+      }
+    }
+
+    function statusBadge(status) {
+      return `<span class="status ${status}">${status}</span>`;
+    }
+
+    function updateStats(events) {
+      const total = events.length;
+      const queued = events.filter(e => e.status === 'queued').length;
+      const processed = events.filter(e => e.status === 'processed').length;
+      const failed = events.filter(e => e.status === 'failed').length;
+
+      document.getElementById('s-total').textContent = total;
+      document.getElementById('s-queued').textContent = queued;
+      document.getElementById('s-processed').textContent = processed;
+      document.getElementById('s-failed').textContent = failed;
+    }
+
+    async function loadEvents() {
+      const rows = document.getElementById('eventRows');
+      rows.innerHTML = '';
+      try {
+        const res = await fetch('/events');
+        const events = await res.json();
+
+        updateStats(events);
+
+        for (const e of events) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${e.id}</td>
+            <td>${e.source}</td>
+            <td>${e.event_type}</td>
+            <td>${statusBadge(e.status)}</td>
+            <td>${new Date(e.created_at).toLocaleString()}</td>
+          `;
+          rows.appendChild(tr);
+        }
+      } catch (err) {
+        rows.innerHTML = '<tr><td colspan="5">Failed to load events</td></tr>';
+      }
+    }
+
+    function toggleAuto() {
+      const btn = document.getElementById('autoBtn');
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        btn.textContent = 'Auto Refresh: Off';
+      } else {
+        autoTimer = setInterval(loadEvents, 3000);
+        btn.textContent = 'Auto Refresh: On';
+      }
+    }
+
+    document.getElementById('createBtn').addEventListener('click', createEvent);
+    document.getElementById('updateBtn').addEventListener('click', updateEvent);
+    document.getElementById('refreshBtn').addEventListener('click', loadEvents);
+    document.getElementById('autoBtn').addEventListener('click', toggleAuto);
+
+    loadEvents();
+  </script>
+</body>
+</html>
