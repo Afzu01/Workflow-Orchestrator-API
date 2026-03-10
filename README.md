@@ -15,10 +15,33 @@ I built this backend project to demonstrate webhook-style event ingestion and wo
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --port 8001
 ```
 
-Open: http://127.0.0.1:8000/docs
+Open after startup (local machine only): [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs)
+
+## For Recruiters
+
+- Local API docs: http://127.0.0.1:8001/docs
+- Live deployment URL: add after deployment
+- Suggested screenshots:
+	- docs_home.png
+	- event_create_response.png
+
+Sample request
+POST /events
+{
+	"source": "n8n",
+	"event_type": "order.created"
+}
+
+Sample response
+{
+	"id": 1,
+	"source": "n8n",
+	"event_type": "order.created",
+	"status": "queued"
+}
 
 ## Future Improvements
 
